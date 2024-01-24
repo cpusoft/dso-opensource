@@ -1,0 +1,14 @@
+package packet
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/cpusoft/goutil/jsonutil"
+)
+
+func TestParseBytesToSrvModel(t *testing.T) {
+	bytess := []byte{0x00, 0x00, 0x00, 0x64, 0x00, 0x50, 0x03, 0x77, 0x77, 0x77, 0x06, 0x64, 0x6e, 0x73, 0x2d, 0x73, 0x64, 0x03, 0x6f, 0x72, 0x67, 0x00}
+	a, newOffsetFromStart, err := ParseBytesToSrvModel(bytess, 999)
+	fmt.Println(jsonutil.MarshalJson(a), newOffsetFromStart, err)
+}

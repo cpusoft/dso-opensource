@@ -1,0 +1,14 @@
+package packet
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/cpusoft/goutil/jsonutil"
+)
+
+func TestParseBytesToMxModel(t *testing.T) {
+	b := []byte{0x00, 0x0a, 0x07, 0x66, 0x72, 0x65, 0x65, 0x6d, 0x78, 0x32, 0x08, 0x73, 0x69, 0x6e, 0x61, 0x6d, 0x61, 0x69, 0x6c, 0xc0, 0x0c}
+	aaaa, newOffsetFromStart, err := ParseBytesToMxModel(b, 100)
+	fmt.Println(jsonutil.MarshalJson(aaaa), newOffsetFromStart, err)
+}

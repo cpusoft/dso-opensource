@@ -1,0 +1,1 @@
+{"origin":"zdns.cn","ttl":10000,"rrModels":[{"rrFullDomain":"printer.zdns.cn","rrType":"A","rrClass":"IN","rrData":"10.1.135.103"},{"rrFullDomain":"printer.zdns.cn","rrType":"TXT","rrClass":"IN","rrTtl":1000,"rrData":"brand=hp;version=1;driverpath=/hp/"}]}

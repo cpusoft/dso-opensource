@@ -1,0 +1,122 @@
+############################################
+# install docker  https://docs.docker.com/engine/install/centos/
+yum install -y yum-utils
+yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+yum install docker-ce docker-ce-cli containerd.io
+systemctl start docker
+
+# install docker in ubuntu  https://docs.docker.com/engine/install/ubuntu/
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo \
+  "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+
+################################################
+# build dns mysql in docker
+docker pull mysql:debian
+docker run --privileged=true -itd --name dns_mysql -p 13307:3306 -e MYSQL_ROOT_PASSWORD=Dns-123 mysql:debian
+docker exec -it dns_mysql /bin/bash
+
+# edit mysql in docker
+mysql -uroot -p
+Dns-123
+
+CREATE USER 'dns'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Dns-123';
+CREATE USER 'dns'@'%' IDENTIFIED WITH mysql_native_password BY 'Dns-123';
+flush privileges;
+
+CREATE DATABASE dns;
+GRANT ALL PRIVILEGES ON dns.* TO 'dns'@'localhost'  with grant option;
+GRANT ALL PRIVILEGES ON dns.* TO 'dns'@'%'  with grant option;
+#grant system_user on *.* to 'root' with grant option;
+#grant system_user on dns.* to 'dns'@'%' with grant option;
+#grant system_user on dns.* to 'dns'@'localhost' with grant option;
+flush privileges;
+quit;
+
+apt-get update
+apt-get install vim
+vi /etc/mysql/my.cnf
+# in server
+[mysqld]
+skip-log-bin
+bind-address=0.0.0.0 
+innodb_lock_wait_timeout=500
+innodb_flush_log_at_trx_commit=2
+max_prepared_stmt_count=1048576
+symbolic-links=0
+slow-query-log=ON
+long_query_time=3
+log-error=/var/lib/mysql/error.log
+
+# in desktop pc
+[mysqld]
+skip-log-bin
+bind-address=0.0.0.0 
+innodb_lock_wait_timeout=500
+innodb_flush_log_at_trx_commit=0 
+max_prepared_stmt_count=1048576
+symbolic-links=0
+slow_query_log=OFF
+innodb_log_buffer_size=128m
+innodb_log_file_size=512m
+sync_binlog=0
+innodb_buffer_pool_size=2G
+innodb_buffer_pool_instances=1
+
+:wq
+
+#quit mysql docker to host
+ctrl^p+q
+
+
+#################################################
+# optional: change host environment
+# timezone
+cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+y
+echo "Asia/shanghai" > /etc/timezone
+echo "alias ll='ls -alF'" >> /root/.bashrc
+
+# change open files
+vim /etc/security/limits.conf  
+* soft nofile 65536  
+* hard nofile 65536 
+vi /etc/systemd/user.conf
+DefaultLimitNOFILE=65536
+vi /etc/systemd/system.conf
+DefaultLimitNOFILE=65536
+vi /root/.bash_profile
+ulimit -n 65536
+#then 
+service sshd restart
+
+# yum install
+yum install -y -q glibc-locale-source glibc-langpack-en wget vim git gcc  automake autoconf  libtool  make telnet rsync  crontabs
+
+# Language
+vi /etc/environment
+LANG=en_US.utf-8
+LC_ALL=
+source /etc/environment
+localedef -f UTF-8 -i en_US en_US.UTF-8
+
+# crontab
+vi /etc/pam.d/crond 
+#session    required   pam_loginuid.so
+
+
+cd /root
+mkdir -p ./dns ./dns/dns-client ./dns/dns-server ./dns/data
